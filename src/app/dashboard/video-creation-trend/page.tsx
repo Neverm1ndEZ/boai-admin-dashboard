@@ -13,7 +13,7 @@ export default function VideoCreationTrend() {
 		try {
 			const encodedEmail = userEmail.replace("@", "%40");
 			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/analytics/video-creation-trend?user_email=${encodedEmail}&days=${days}`,
+				`${process.env.NEXT_PUBLIC_API_URL}/analytics/video-trend?user_email=${encodedEmail}&days=${days}`,
 			);
 
 			setVideoCreationTrend(response.data.video_creation_trend);

@@ -9,40 +9,44 @@ import {
 	TableBody,
 	TableRow,
 	TableCell,
+	Button,
 } from "@nextui-org/react";
 import { useDateFormatter } from "@react-aria/i18n";
 import { Select as NextUISelect, SelectItem } from "@nextui-org/react";
 import axios from "axios";
 
+interface WorkspaceData {
+	start_date: string;
+	end_date: string;
+	granularity: string;
+	total_workspaces: number;
+	total_videos: number;
+	workspace_summary: {
+		workspace_id: string;
+		workspace_name: string;
+		total_videos: number;
+		active_periods: number;
+	}[];
+	trend_data: {
+		date: string;
+		count: number;
+	}[];
+	avg_videos_per_hour: number;
+	max_videos_in_period: number;
+	min_videos_in_period: number;
+	total_active_hours: number;
+	workspace_utilization: number;
+}
+
 export default function GetWorkspaceUsage() {
 	const [dateRange, setDateRange] = useState({
-		start: parseDate("2024-04-01"),
-		end: parseDate("2024-04-08"),
+		start: parseDate("2024-07-01"),
+		end: parseDate("2024-07-15"),
 	});
 	const [granularity, setGranularity] = useState("daily");
-	const [workspaceData, setWorkspaceData] = useState<null | {
-		start_date: string;
-		end_date: string;
-		granularity: string;
-		total_workspaces: number;
-		total_videos: number;
-		avg_videos_per_day: number;
-		workspace_summary: {
-			workspace_id: string;
-			workspace_name: string;
-			total_videos: number;
-			active_days: number;
-			avg_videos_per_active_day: number;
-		}[];
-		trend_data: {
-			date: string;
-			count: number;
-		}[];
-		max_videos_in_period: number;
-		min_videos_in_period: number;
-		total_active_days: number;
-		workspace_utilization: number;
-	}>(null);
+	const [workspaceData, setWorkspaceData] = useState<WorkspaceData | null>(
+		null,
+	);
 
 	const fetchWorkspaceUsage = async () => {
 		try {
@@ -74,12 +78,9 @@ export default function GetWorkspaceUsage() {
 			<div className="flex items-start justify-center gap-4">
 				<DateRangeCalender value={dateRange} onChange={setDateRange} />
 				<DropDown params={params} setGranularity={setGranularity} />
-				<button
-					className="bg-[#3e3d3c] p-2 rounded-xl"
-					onClick={fetchWorkspaceUsage}
-				>
-					Get User Workspaces
-				</button>
+				<Button onClick={fetchWorkspaceUsage} size="lg" className="text-xs">
+					Get Workspace Usage
+				</Button>
 			</div>
 			{workspaceData && (
 				<div className="mt-8">
@@ -105,8 +106,8 @@ export default function GetWorkspaceUsage() {
 								<strong>Total Videos:</strong> {workspaceData.total_videos}
 							</p>
 							<p>
-								<strong>Avg Videos Per Day:</strong>{" "}
-								{workspaceData.avg_videos_per_day}
+								<strong>Avg Videos Per Hour:</strong>{" "}
+								{workspaceData.avg_videos_per_hour.toFixed(2)}
 							</p>
 						</div>
 					</div>
@@ -117,8 +118,7 @@ export default function GetWorkspaceUsage() {
 							<TableColumn>Workspace ID</TableColumn>
 							<TableColumn>Workspace Name</TableColumn>
 							<TableColumn>Total Videos</TableColumn>
-							<TableColumn>Active Days</TableColumn>
-							<TableColumn>Avg Videos Per Active Day</TableColumn>
+							<TableColumn>Active Periods</TableColumn>
 						</TableHeader>
 						<TableBody>
 							{workspaceData.workspace_summary.map((workspace) => (
@@ -126,10 +126,7 @@ export default function GetWorkspaceUsage() {
 									<TableCell>{workspace.workspace_id}</TableCell>
 									<TableCell>{workspace.workspace_name}</TableCell>
 									<TableCell>{workspace.total_videos}</TableCell>
-									<TableCell>{workspace.active_days}</TableCell>
-									<TableCell>
-										{workspace.avg_videos_per_active_day.toFixed(2)}
-									</TableCell>
+									<TableCell>{workspace.active_periods}</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
@@ -161,8 +158,8 @@ export default function GetWorkspaceUsage() {
 							{workspaceData.min_videos_in_period}
 						</p>
 						<p>
-							<strong>Total Active Days:</strong>{" "}
-							{workspaceData.total_active_days}
+							<strong>Total Active Hours:</strong>{" "}
+							{workspaceData.total_active_hours}
 						</p>
 						<p>
 							<strong>Workspace Utilization:</strong>{" "}
@@ -174,7 +171,6 @@ export default function GetWorkspaceUsage() {
 		</div>
 	);
 }
-
 const DateRangeCalender = ({
 	value,
 	onChange,
@@ -187,11 +183,7 @@ const DateRangeCalender = ({
 	return (
 		<div className="flex flex-row gap-2">
 			<div className="w-full flex flex-col gap-y-2">
-				<DateRangePicker
-					label="Date range (controlled)"
-					value={value}
-					onChange={onChange}
-				/>
+				<DateRangePicker label="Date range" value={value} onChange={onChange} />
 				<p className="text-default-500 text-sm">
 					Selected date:{" "}
 					{value

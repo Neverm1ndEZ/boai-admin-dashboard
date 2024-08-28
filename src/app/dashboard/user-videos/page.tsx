@@ -1,15 +1,36 @@
 "use client";
 import axios from "axios";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+	Table,
+	TableHeader,
+	TableColumn,
+	TableBody,
+	TableRow,
+	TableCell,
+	Button,
+} from "@nextui-org/react";
 
 export default function GetUserVideos() {
 	const [userEmail, setUserEmail] = useState("");
+	const router = useRouter();
+
 	interface Video {
 		video_id: string;
 		workspace_id: string;
 		creation_date: string;
 		user_location: string;
 		user_industry: string;
+		clips: any[];
+		audio: {
+			id: string;
+			filename: string;
+		};
+		output: string;
+		speed: string;
+		style: string;
+		xml: string;
 	}
 
 	const [videos, setVideos] = useState<Video[]>([]);
@@ -18,7 +39,7 @@ export default function GetUserVideos() {
 		try {
 			const encodedEmail = userEmail.replace("@", "%40");
 			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/users/${encodedEmail}/videos`,
+				`${process.env.NEXT_PUBLIC_API_URL}/users/{email}/videos?user_email=${encodedEmail}`,
 			);
 			setVideos(response.data);
 			console.log(response.data);
@@ -27,8 +48,72 @@ export default function GetUserVideos() {
 		}
 	};
 
+	const handleRowClick = (video_id: string) => {
+		router.push(`/dashboard/user-videos/${video_id}`);
+	};
+
+	const downloadAudio = async (audio_id: string, filename: string) => {
+		try {
+			const response = await axios.get(
+				`https://dev.blinkofai.io/api/video/media/${audio_id}`,
+				{
+					responseType: "blob",
+				},
+			);
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", filename);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+		} catch (error) {
+			console.error("Error downloading audio:", error);
+		}
+	};
+
+	const downloadVideo = async (video_id: string) => {
+		try {
+			const response = await axios.get(
+				`https://dev.blinkofai.io/api/video/lineups/${video_id}/export_video`,
+				{
+					responseType: "blob",
+				},
+			);
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", `video_${video_id}.mp4`);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+		} catch (error) {
+			console.error("Error downloading video:", error);
+		}
+	};
+
+	const downloadXML = async (video_id: string) => {
+		try {
+			const response = await axios.get(
+				`https://dev.blinkofai.io/api/video/lineups/${video_id}/export_xml`,
+				{
+					responseType: "blob",
+				},
+			);
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", `video_${video_id}.xml`);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+		} catch (error) {
+			console.error("Error downloading XML:", error);
+		}
+	};
+
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 p-4">
 			<h1 className="text-2xl font-bold">User Videos</h1>
 			<p>Welcome to the user videos page</p>
 			<div className="space-x-4">
@@ -39,43 +124,79 @@ export default function GetUserVideos() {
 					className="bg-[#3e3d3c] p-3.5 rounded-xl"
 					placeholder="Enter user email"
 				/>
-				<button
-					className="bg-[#3e3d3c] p-2 rounded-xl"
-					onClick={fetchUserVideos}
-				>
-					Get User Videos
-				</button>
+				<Button onClick={fetchUserVideos}>Get User Videos</Button>
 			</div>
 			{videos.length > 0 && (
 				<div>
 					<h2 className="text-xl font-semibold mt-4">Videos:</h2>
-					<table className="min-w-full bg-[#3e3d3c] rounded-xl mt-2">
-						<thead>
-							<tr>
-								<th className="px-4 py-2">Video ID</th>
-								<th className="px-4 py-2">Workspace ID</th>
-								<th className="px-4 py-2">Creation Date</th>
-								<th className="px-4 py-2">User Location</th>
-								<th className="px-4 py-2">User Industry</th>
-							</tr>
-						</thead>
-						<tbody>
+					<Table aria-label="User videos table">
+						<TableHeader>
+							<TableColumn>Video ID</TableColumn>
+							<TableColumn>Workspace ID</TableColumn>
+							<TableColumn>Creation Date</TableColumn>
+							<TableColumn>User Location</TableColumn>
+							<TableColumn>User Industry</TableColumn>
+							<TableColumn>Clips</TableColumn>
+							<TableColumn>Audio</TableColumn>
+							<TableColumn>Video</TableColumn>
+							<TableColumn>Speed</TableColumn>
+							<TableColumn>Style</TableColumn>
+							<TableColumn>XML</TableColumn>
+						</TableHeader>
+						<TableBody>
 							{videos.map((video, index) => (
-								<tr
+								<TableRow
 									key={index}
-									className={index % 2 === 0 ? "bg-[#4a4948]" : ""}
+									onClick={() => handleRowClick(video.video_id)}
+									className="cursor-pointer"
 								>
-									<td className="px-4 py-2 text-left">{video.video_id}</td>
-									<td className="px-4 py-2 text-left">{video.workspace_id}</td>
-									<td className="px-4 py-2 text-left">
+									<TableCell>{video.video_id}</TableCell>
+									<TableCell>{video.workspace_id}</TableCell>
+									<TableCell>
 										{new Date(video.creation_date).toLocaleString()}
-									</td>
-									<td className="px-4 py-2 text-left">{video.user_location}</td>
-									<td className="px-4 py-2 text-left">{video.user_industry}</td>
-								</tr>
+									</TableCell>
+									<TableCell>{video.user_location}</TableCell>
+									<TableCell>{video.user_industry}</TableCell>
+									<TableCell>{video.clips.length}</TableCell>
+									<TableCell>
+										<Button
+											size="sm"
+											onClick={(e) => {
+												e.stopPropagation();
+												downloadAudio(video.audio.id, video.audio.filename);
+											}}
+										>
+											Download Audio
+										</Button>
+									</TableCell>
+									<TableCell>
+										<Button
+											size="sm"
+											onClick={(e) => {
+												e.stopPropagation();
+												downloadVideo(video.video_id);
+											}}
+										>
+											Download Video
+										</Button>
+									</TableCell>
+									<TableCell>{video.speed}</TableCell>
+									<TableCell>{video.style}</TableCell>
+									<TableCell>
+										<Button
+											size="sm"
+											onClick={(e) => {
+												e.stopPropagation();
+												downloadXML(video.video_id);
+											}}
+										>
+											Download XML
+										</Button>
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

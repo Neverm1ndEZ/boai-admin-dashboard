@@ -1,14 +1,16 @@
 "use client";
 import axios from "axios";
 import { useState } from "react";
-
-interface Screenplay {
-	id: string;
-}
-
-interface Lineup {
-	id: string;
-}
+import {
+	Table,
+	TableHeader,
+	TableColumn,
+	TableBody,
+	TableRow,
+	TableCell,
+	Input,
+	Button,
+} from "@nextui-org/react";
 
 interface Workspace {
 	workspace_id: string;
@@ -25,7 +27,7 @@ export default function GetWorkspaceContent() {
 		try {
 			const encodedEmail = userEmail.replace("@", "%40");
 			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/users/${encodedEmail}/workspace-content`,
+				`${process.env.NEXT_PUBLIC_API_URL}/users/{email}/workspaces?user_email=${encodedEmail}`,
 			);
 			setWorkspaces(response.data.workspaces);
 			console.log(response.data);
@@ -35,57 +37,40 @@ export default function GetWorkspaceContent() {
 	};
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 p-4">
 			<h1 className="text-2xl font-bold">User Workspace Content</h1>
 			<p>Welcome to the user workspace content page</p>
-			<div className="space-x-4">
-				<input
+			<div className="flex space-x-4">
+				<Input
 					type="email"
 					value={userEmail}
 					onChange={(e) => setUserEmail(e.target.value)}
-					className="bg-[#3e3d3c] p-3.5 rounded-xl"
 					placeholder="Enter user email"
 				/>
-				<button
-					className="bg-[#3e3d3c] p-2 rounded-xl"
-					onClick={fetchUserWorkspaces}
-				>
-					Get User Workspaces
-				</button>
+				<Button onClick={fetchUserWorkspaces}>Get User Workspaces</Button>
 			</div>
 
 			{workspaces.length > 0 && (
 				<div>
 					<h2 className="text-xl font-semibold mt-4">Workspaces:</h2>
-					<table className="min-w-full bg-[#3e3d3c] rounded-xl mt-2">
-						<thead>
-							<tr>
-								<th className="px-4 py-2">Workspace ID</th>
-								<th className="px-4 py-2">Name</th>
-								<th className="px-4 py-2">Screenplay IDs</th>
-								<th className="px-4 py-2">Lineup IDs</th>
-							</tr>
-						</thead>
-						<tbody>
+					<Table aria-label="Workspaces table">
+						<TableHeader>
+							<TableColumn>Workspace ID</TableColumn>
+							<TableColumn>Name</TableColumn>
+							<TableColumn>Screenplay IDs</TableColumn>
+							<TableColumn>Lineup IDs</TableColumn>
+						</TableHeader>
+						<TableBody>
 							{workspaces.map((workspace, index) => (
-								<tr
-									key={index}
-									className={index % 2 === 0 ? "bg-[#4a4948]" : ""}
-								>
-									<td className="px-4 py-2 text-left">
-										{workspace.workspace_id}
-									</td>
-									<td className="px-4 py-2 text-left">{workspace.name}</td>
-									<td className="px-4 py-2 text-left">
-										{workspace.screenplay_ids.join(", ")}
-									</td>
-									<td className="px-4 py-2 text-left">
-										{workspace.lineup_ids.join(", ")}
-									</td>
-								</tr>
+								<TableRow key={index}>
+									<TableCell>{workspace.workspace_id}</TableCell>
+									<TableCell>{workspace.name}</TableCell>
+									<TableCell>{workspace.screenplay_ids.join(", ")}</TableCell>
+									<TableCell>{workspace.lineup_ids.join(", ")}</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

@@ -35,15 +35,20 @@ const Sidebar = () => {
 			href: "/dashboard/video-creation-trend",
 			spantag: "Video Creation Trend",
 		},
-		{
-			id: 5,
-			href: "/dashboard/video-statistics",
-			spantag: "Video Statistics",
-		},
+		// {
+		// 	id: 5,
+		// 	href: "/dashboard/video-statistics",
+		// 	spantag: "Video Statistics",
+		// },
 		{
 			id: 6,
 			href: "/dashboard/workspace-usage",
 			spantag: "Workspace Usage",
+		},
+		{
+			id: 7,
+			href: "/dashboard/create-super-admin",
+			spantag: "Admin Settings",
 		},
 	];
 
