@@ -11,7 +11,9 @@ import {
 } from "@nextui-org/react";
 
 export default function GetUsers() {
-	const [users, setUsers] = useState([]);
+	const [users, setUsers] = useState<
+		{ username: string; email: string; signup_date: string }[]
+	>([]);
 
 	const getUsers = async () => {
 		try {

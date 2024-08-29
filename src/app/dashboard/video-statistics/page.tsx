@@ -4,7 +4,11 @@ import { useState } from "react";
 
 export default function VideoStatistics() {
 	const [userEmail, setUserEmail] = useState("");
-	const [videoStats, setVideoStats] = useState(null);
+	const [videoStats, setVideoStats] = useState<{
+		total_videos: number;
+		daywise_video_creation: { date: string; count: number }[];
+		hourwise_video_creation: { hour: number; count: number }[];
+	} | null>(null);
 
 	const fetchVideoStatistics = async () => {
 		try {
