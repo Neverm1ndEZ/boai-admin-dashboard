@@ -3,13 +3,12 @@ import { Button } from "@nextui-org/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Create an axios instance
 const api = axios.create({
 	baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-// Add a request interceptor
 api.interceptors.request.use(
 	(config) => {
 		const token = localStorage.getItem("token");
@@ -26,6 +25,10 @@ api.interceptors.request.use(
 export default function Login() {
 	const [email, setEmail] = React.useState("");
 	const [password, setPassword] = React.useState("");
+	const [alert, setAlert] = React.useState<{
+		type: "success" | "error";
+		message: string;
+	} | null>(null);
 	const router = useRouter();
 
 	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,14 +58,21 @@ export default function Login() {
 
 			const { access_token } = response.data;
 
-			// Store the token in localStorage
 			localStorage.setItem("token", access_token);
+			setAlert({
+				type: "success",
+				message: "Login successful! Redirecting...",
+			});
 
-			// Redirect to dashboard or home page
-			router.push("/dashboard");
+			// Delay redirect to show success message
+			setTimeout(() => {
+				router.push("/dashboard");
+			}, 1500);
 		} catch (error) {
-			console.error("Login failed:", error);
-			// Handle login error (e.g., show error message to user)
+			setAlert({
+				type: "error",
+				message: "Login failed. Please check your credentials and try again.",
+			});
 		}
 	};
 
@@ -72,6 +82,17 @@ export default function Login() {
 				<h1 className="text-4xl font-bold text-center">
 					Sign In to Our Dashboard
 				</h1>
+				{alert && (
+					<Alert
+						variant={alert.type === "success" ? "default" : "destructive"}
+						className="mb-4"
+					>
+						<AlertTitle>
+							{alert.type === "success" ? "Success" : "Error"}
+						</AlertTitle>
+						<AlertDescription>{alert.message}</AlertDescription>
+					</Alert>
+				)}
 				<form
 					onSubmit={handleLogin}
 					className="flex flex-col justify-center items-center gap-5 w-full"

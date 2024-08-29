@@ -1,5 +1,6 @@
 "use client";
 import { Button, Select, SelectItem } from "@nextui-org/react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import axios from "axios";
 import React from "react";
 
@@ -12,12 +13,19 @@ export default function AdminCreationPage() {
 	const [userEmail, setUserEmail] = React.useState("");
 	const [password, setPassword] = React.useState("");
 	const [isSuperAdmin, setIsSuperAdmin] = React.useState(false);
+	const [alert, setAlert] = React.useState<{
+		type: "success" | "error";
+		message: string;
+	} | null>(null);
 
 	const handleAdminCreation = async () => {
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) {
-				console.error("No token found. Please log in first.");
+				setAlert({
+					type: "error",
+					message: "No token found. Please log in first.",
+				});
 				return;
 			}
 
@@ -32,32 +40,50 @@ export default function AdminCreationPage() {
 					"Content-Type": "application/json",
 				},
 			});
-
 			console.log("Admin created successfully:", response.data);
-			// Handle successful creation (e.g., show success message, clear form, etc.)
+			setAlert({ type: "success", message: "Admin created successfully!" });
+			// Clear form fields
+			setUserEmail("");
+			setPassword("");
+			setIsSuperAdmin(false);
 		} catch (error) {
 			console.error("Failed to create admin:", error);
-			// Handle error (e.g., show error message to user)
+			setAlert({
+				type: "error",
+				message: "Failed to create admin. Please try again.",
+			});
 		}
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen ">
-			<div className="bg- p-8 rounded-lg shadow-md w-96">
+		<div className="flex flex-col items-center justify-center min-h-screen">
+			<div className="bg-[#4c4c4c] p-8 rounded-lg shadow-md w-96">
 				<h1 className="text-2xl font-bold mb-6 text-center">Create Admin</h1>
+				{alert && (
+					<Alert
+						className={`mb-4 ${
+							alert.type === "success" ? "bg-green-500" : "bg-red-500"
+						}`}
+					>
+						<AlertTitle>
+							{alert.type === "success" ? "Success" : "Error"}
+						</AlertTitle>
+						<AlertDescription>{alert.message}</AlertDescription>
+					</Alert>
+				)}
 				<div className="space-y-4">
 					<input
 						type="email"
 						value={userEmail}
 						onChange={(e) => setUserEmail(e.target.value)}
-						className="bg-gray-700 p-3 rounded-xl w-full"
+						className="bg-[#323231] p-3.5 w-full rounded-xl"
 						placeholder="Enter user email"
 					/>
 					<input
 						type="password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						className="bg-gray-700 p-3 rounded-xl w-full"
+						className="bg-[#323231] p-3.5 w-full rounded-xl"
 						placeholder="Enter password"
 					/>
 					<Select

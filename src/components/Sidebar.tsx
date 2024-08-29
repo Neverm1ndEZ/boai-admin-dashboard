@@ -5,9 +5,11 @@ import styles from "./DashboardNavbar.module.css";
 import { LowerMenuIcons, MenuIcons } from "./MenuIcons";
 import Image from "next/image";
 import logo from "../../public/boai.svg";
+import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
 	const [selectedButton, setSelectedButton] = useState(0);
+	const router = useRouter();
 
 	const MenuData = [
 		{
@@ -35,18 +37,13 @@ const Sidebar = () => {
 			href: "/dashboard/video-creation-trend",
 			spantag: "Video Creation Trend",
 		},
-		// {
-		// 	id: 5,
-		// 	href: "/dashboard/video-statistics",
-		// 	spantag: "Video Statistics",
-		// },
 		{
-			id: 6,
+			id: 5,
 			href: "/dashboard/workspace-usage",
 			spantag: "Workspace Usage",
 		},
 		{
-			id: 7,
+			id: 6,
 			href: "/dashboard/create-super-admin",
 			spantag: "Admin Settings",
 		},
@@ -54,6 +51,13 @@ const Sidebar = () => {
 
 	const handleButtonClick = (id: number) => {
 		setSelectedButton(id);
+	};
+
+	const handleLogout = () => {
+		// Clear the authentication token from localStorage
+		localStorage.removeItem("token");
+		// Redirect to the login page
+		router.push("/login");
 	};
 
 	return (
@@ -84,7 +88,7 @@ const Sidebar = () => {
 								}`}
 								onClick={() => handleButtonClick(menuData.id)}
 							>
-								<div className="flex gap-2">
+								<div className="flex gap-4 text-left items-center">
 									{MenuIcons[menuData.id]}
 									<span>{menuData.spantag}</span>
 								</div>
@@ -93,19 +97,14 @@ const Sidebar = () => {
 					))}
 				</ul>
 				<ul className="flex flex-col gap-5 items-center w-full text-[14px]">
-					<Link href="/settings" className="flex w-full px-4">
-						<button className="flex p-2 w-full gap-2  rounded-lg hover:bg-gradient-to-br from-orange-500 to-orange-800 ">
-							{LowerMenuIcons[0]}
-							<span>Settings</span>
+					<div className="flex w-full px-4">
+						<button
+							onClick={handleLogout}
+							className="flex p-2 rounded-lg w-full gap-2 hover:bg-gradient-to-br from-orange-500 to-orange-800"
+						>
+							{LowerMenuIcons[1]}
+							<span>Log Out</span>
 						</button>
-					</Link>
-					<div className="flex w-full  px-4  ">
-						<Link href={"/login"}>
-							<button className="flex p-2 rounded-lg w-full gap-2  hover:bg-gradient-to-br from-orange-500 to-orange-800 ">
-								{LowerMenuIcons[1]}
-								<span>Log Out</span>
-							</button>
-						</Link>
 					</div>
 				</ul>
 			</nav>
