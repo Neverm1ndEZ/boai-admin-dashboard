@@ -11,7 +11,7 @@ export default function GetUserCredits() {
 		try {
 			const encodedEmail = userEmail.replace("@", "%40");
 			const response = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/users/{email}/credits?user_email=${encodedEmail}`,
+				`${process.env.NEXT_PUBLIC_API_URL}/users/${encodedEmail}/credits`,
 			);
 			setCredits(response.data.credits);
 			setEmail(response.data.user_email);
